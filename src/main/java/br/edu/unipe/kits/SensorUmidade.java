@@ -8,10 +8,14 @@ public class SensorUmidade implements Sensor {
     }
 
     public SensorUmidade(Cenario cenario) {
-        this.valor = switch (cenario) {
+        this(switch (cenario) {
             case NORMAL -> 55;
             case ALERTA -> 25;
-        };
+        });
+    }
+
+    SensorUmidade(int valor) {
+        this.valor = valor;
     }
 
     @Override

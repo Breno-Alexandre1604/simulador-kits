@@ -8,10 +8,14 @@ public class SensorTemperatura implements Sensor {
     }
 
     public SensorTemperatura(Cenario cenario) {
-        this.valor = switch (cenario) {
+        this(switch (cenario) {
             case NORMAL -> 4;
             case ALERTA -> 12;
-        };
+        });
+    }
+
+    SensorTemperatura(int valor) {
+        this.valor = valor;
     }
 
     @Override
