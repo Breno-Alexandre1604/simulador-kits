@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Simulador de kits de automação</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #eaf0ed; font: 1.08rem/1.55 system-ui, sans-serif; color: #183c34; }
+    main { margin: 7vh auto; max-width: 40rem; padding: 2rem; }
+    h1 { line-height: 1.12; font-size: clamp(2rem,6vw,3.3rem); margin: 0 0 1rem; }
+    form,section { background: white; padding: 1.3rem; border-radius: .7rem; margin-top: 1.3rem; }
+    label,select,button { display: block; }
+    select,button { font: inherit; border-radius: .4rem; padding: .55rem .8rem; }
+    select { width: 100%; margin: .4rem 0 1rem; }
+    button { color: white; background: #125142; border: 0; cursor: pointer; }
+    h2 { margin-top: 0; } dt { font-weight: 650; } dd { margin: 0 0 .65rem; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Simulador de kits de automação</h1>
+  <p>Escolha um ambiente para ver a leitura do sensor e a resposta do atuador.</p>
+  <form id="formulario">
+    <label for="ambiente">Ambiente</label>
+    <select id="ambiente"><option value="estufa">Estufa</option><option value="camara-fria">Câmara fria</option></select>
+    <button>Executar simulação</button>
+  </form>
+  <p id="aviso" role="status"></p>
+  <section id="resultado" hidden>
+    <h2 id="titulo"></h2>
+    <dl><dt>Sensor</dt><dd id="sensor"></dd><dt>Leitura simulada</dt><dd id="leitura"></dd>
+      <dt>Atuador</dt><dd id="atuador"></dd><dt>Estado</dt><dd id="estado"></dd></dl>
+  </section>
+</main>
+<script>
+  const elemento = id => document.getElementById(id);
+  elemento("formulario").addEventListener("submit", async evento => {
+    evento.preventDefault();
+    const seletor = elemento("ambiente");
+    const botao = evento.submitter;
+    const nome = seletor.selectedOptions[0].text;
+    botao.disabled = true;
+    seletor.disabled = true;
+    elemento("resultado").hidden = true;
+    elemento("aviso").textContent = "Simulando…";
+    try {
+      const resposta = await fetch("/api/simulacoes/" + seletor.value);
+      if (!resposta.ok) throw new Error("Falha na simulação");
+      const dados = await resposta.json();
+      elemento("titulo").textContent = nome;
+      elemento("sensor").textContent = dados.leitura.sensor;
+      elemento("leitura").textContent = dados.leitura.valor + " " + dados.leitura.unidade;
+      elemento("atuador").textContent = dados.atuador;
+      elemento("estado").textContent = dados.estado;
+      elemento("resultado").hidden = false;
+      elemento("aviso").textContent = "Simulação concluída.";
+    } catch {
+      elemento("aviso").textContent = "Falha ao consultar o simulador. Verifique se o servidor está em execução.";
+    } finally {
+      botao.disabled = false;
+      seletor.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>
